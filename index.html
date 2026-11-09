@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="robots" content="noindex" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Your Place · 3D city model of any address, free STL export</title>
+    <meta name="description" content="Type any address and see the area around it as a 3D model with real terrain and building heights. Free, no sign-up. Save a poster or an STL to 3D print." />
+    <link rel="canonical" href="https://yourplace3d.github.io/3d-city-test/" />
+    <meta name="theme-color" content="#ebe7df" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1c1b19" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Your Place" />
+    <meta property="og:title" content="Your Place · the places that matter to you, in 3D" />
+    <meta property="og:description" content="The street you grew up on, where you met, the town you left: type the address and get it as a 3D model with real terrain and buildings. Free. Share it, save a poster or 3D print it." />
+    <meta property="og:url" content="https://yourplace3d.github.io/3d-city-test/" />
+    <meta property="og:image" content="https://yourplace3d.github.io/3d-city-test/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A 3D model of a city on its real terrain, made with Your Place" />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Your Place · the places that matter to you, in 3D" />
+    <meta name="twitter:description" content="The street you grew up on, where you met, the town you left: type the address and get it as a 3D model. Free, works on your phone." />
+    <meta name="twitter:image" content="https://yourplace3d.github.io/3d-city-test/og.jpg" />
+    <meta name="twitter:image:alt" content="A 3D model of a city on its real terrain, made with Your Place" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Your Place",
+        "url": "https://yourplace3d.github.io/3d-city-test/",
+        "description": "Turn any address into a 3D miniature of the surrounding city, with the real terrain underneath. Download a poster or a watertight STL file for 3D printing.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires a browser with WebGL 2",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "image": "https://yourplace3d.github.io/3d-city-test/og.jpg",
+        "screenshot": "https://yourplace3d.github.io/3d-city-test/og.jpg",
+        "featureList": [
+          "3D model of any square from 300 m to 4 km around an address",
+          "Real terrain with adjustable exaggeration and contour lines",
+          "Buildings at their mapped height",
+          "Pin a house and share a link to it",
+          "Poster image download",
+          "Watertight STL file for 3D printing"
+        ],
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/yourplace3d/3d-city",
+        "author": { "@type": "Organization", "name": "Your Place", "url": "https://github.com/yourplace3d" }
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/main-C0YqrW1y.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/main-Ba8c9Tls.css">
+  </head>
+  <body data-app="place">
+    <div class="app" id="app" data-mode="landing">
+      <div class="stage" id="stage">
+        <canvas
+          id="scene"
+          tabindex="0"
+          role="img"
+          aria-roledescription="3D model"
+          aria-label="3D model of the selected area. Arrow keys orbit and tilt, plus and minus zoom, N faces north, 0 resets the view."
+          data-t-attr="aria-label:canvasLabel"
+        ></canvas>
+      </div>
+
+      <header class="topbar">
+        <form class="search" id="search-form" role="search" autocomplete="off">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+          <input
+            id="search-input"
+            type="search"
+            inputmode="search"
+            enterkeyhint="search"
+            placeholder="Search an address or place"
+            aria-label="Search an address or place"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="suggestions"
+            data-t-attr="placeholder:searchPlaceholder;aria-label:searchPlaceholder"
+          />
+          <button type="button" class="icon-btn" id="locate-btn" aria-label="Use my location" title="Use my location" data-t-attr="aria-label:useLocation;title:useLocation">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" /><circle cx="12" cy="12" r="7.5" /><path d="M12 1.8v3M12 19.2v3M1.8 12h3M19.2 12h3" /></svg>
+          </button>
+          <ul class="suggestions" id="suggestions" role="listbox" aria-label="Suggestions" data-t-attr="aria-label:suggestions" hidden></ul>
+        </form>
+        <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+        <div class="notice" id="notice" role="status" aria-live="polite" hidden>
+          <p class="notice-text" id="notice-text"></p>
+          <div class="notice-actions" id="notice-actions"></div>
+          <button type="button" class="icon-btn notice-close" id="notice-close" aria-label="Dismiss" data-t-attr="aria-label:dismiss">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="welcome" id="welcome" aria-labelledby="welcome-title">
+        <p class="eyebrow">Your Place</p>
+        <h1 id="welcome-title" data-t="welcomeTitle">The street you grew up on, in 3D</h1>
+        <p class="lede" data-t="welcomeLede">Your first home, where you met, the town you left. Type the address and get it as a model on its real terrain, every building standing on top. Share it, hang it as a poster, or 3D print it.</p>
+        <p class="presets-label" data-t="presetsLabel">Or explore a place with dramatic terrain</p>
+        <div class="presets" id="presets"></div>
+        <p class="welcome-data"><a href="./data/" id="data-landing-link"><strong>Your Place · Data</strong> <span data-t="dataTeaser">New: where it gets steep, traffic in Hamburg, your race route</span> →</a></p>
+        <p class="welcome-more"><a href="./about/" data-t="aboutLink">How it works, 3D printing tips and data sources</a></p>
+        <label class="lang"><span data-t="language">Language</span> <select class="lang-select"></select></label>
+      </section>
+
+      <div class="fabs" id="fabs">
+        <button type="button" class="fab" id="compass-btn" aria-label="Face north" title="Face north (N)" data-t-attr="aria-label:faceNorth;title:faceNorthKey">
+          <svg viewBox="0 0 24 24" aria-hidden="true" id="compass-needle"><path class="needle-n" d="M12 3.5 15 12H9z" /><path class="needle-s" d="M12 20.5 9 12h6z" /></svg>
+        </button>
+        <button type="button" class="fab" id="reset-btn" aria-label="Reset view" title="Reset view (0)" data-t-attr="aria-label:resetView;title:resetViewKey">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M4 15v5h5M20 9V4h-5" /></svg>
+        </button>
+        <button type="button" class="fab" id="share-btn" aria-label="Share or export" title="Share or export" data-t-attr="aria-label:shareOrExport;title:shareOrExport">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" /><path d="M5 12v7.5h14V12" /></svg>
+        </button>
+        <a class="fab" id="other-app" href="./data/" aria-label="Data layers for this place" title="Data layers for this place: steepness, traffic, your route" data-t-attr="aria-label:openData;title:openDataTitle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8 4-8 4-8-4z" /><path d="m4 12 8 4 8-4" /><path d="m4 16 8 4 8-4" /></svg>
+        </a>
+      </div>
+
+      <div class="mouse-hint" id="mouse-hint" hidden>
+        <span><span data-t="mouseHint">Drag to turn · right-drag to slide · </span><strong data-t="mouseHintStrong">double-click to load the area there</strong></span>
+        <button type="button" class="icon-btn" id="mouse-hint-close" aria-label="Hide this hint" data-t-attr="aria-label:hideHint">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      <aside class="sheet" id="sheet" aria-label="Model settings" data-t-attr="aria-label:settings">
+        <button type="button" class="sheet-head" id="sheet-toggle" aria-expanded="false" aria-controls="sheet-body">
+          <span class="sheet-title">
+            <span class="place-title" id="place-title">—</span>
+            <span class="place-meta" id="place-meta"></span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+        </button>
+        <div class="sheet-body" id="sheet-body">
+          <div class="control">
+            <div class="control-label">
+              <label for="ex-range" data-t="exaggeration">Terrain exaggeration</label>
+              <output id="ex-out" for="ex-range">×1.5</output>
+            </div>
+            <input type="range" id="ex-range" min="1" max="5" step="0.1" value="1.5" />
+          </div>
+
+          <div class="control control-row">
+            <div class="control-label">
+              <span id="contour-label" data-t="contours">Contour lines</span>
+              <small id="contour-note">every 10 m</small>
+            </div>
+            <button type="button" class="switch" id="contour-switch" role="switch" aria-checked="false" aria-labelledby="contour-label">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+
+          <div class="control">
+            <div class="control-label"><span id="style-label" data-t="buildings">Buildings</span></div>
+            <div class="segmented swatches" role="radiogroup" aria-labelledby="style-label" id="style-group">
+              <button type="button" role="radio" data-value="white" aria-checked="true"><span class="style-swatch" aria-hidden="true"></span><span data-t="style.white">White</span></button>
+              <button type="button" role="radio" data-value="grey" aria-checked="false" tabindex="-1"><span class="style-swatch" aria-hidden="true"></span><span data-t="style.grey">Grey</span></button>
+              <button type="button" role="radio" data-value="sand" aria-checked="false" tabindex="-1"><span class="style-swatch" aria-hidden="true"></span><span data-t="style.sand">Sand</span></button>
+              <button type="button" role="radio" data-value="dark" aria-checked="false" tabindex="-1"><span class="style-swatch" aria-hidden="true"></span><span data-t="style.dark">Dark</span></button>
+              <button type="button" role="radio" data-value="ramp" aria-checked="false" tabindex="-1"><span class="style-swatch" aria-hidden="true"></span><span data-t="style.ramp">By height</span></button>
+            </div>
+            <div class="legend" id="legend" hidden>
+              <div class="legend-bar" id="legend-bar"></div>
+              <div class="legend-labels" id="legend-labels"></div>
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="size-range" data-t="area">Area</label>
+              <output id="size-out" for="size-range">2 × 2 km</output>
+            </div>
+            <input type="range" id="size-range" min="300" max="4000" step="100" value="2000" list="size-ticks" />
+            <datalist id="size-ticks"><option value="1000"></option><option value="2000"></option><option value="4000"></option></datalist>
+          </div>
+
+          <div class="control">
+            <div class="control-label"><span id="layers-label" data-t="mapLayers">Map layers</span></div>
+            <div class="chips" role="group" aria-labelledby="layers-label" id="layers-group">
+              <button type="button" class="chip" data-layer="roads" aria-pressed="true"><i class="swatch swatch-roads"></i><span data-t="layer.roads">Roads</span></button>
+              <button type="button" class="chip" data-layer="water" aria-pressed="true"><i class="swatch swatch-water"></i><span data-t="layer.water">Water</span></button>
+              <button type="button" class="chip" data-layer="green" aria-pressed="true"><i class="swatch swatch-green"></i><span data-t="layer.green">Green</span></button>
+            </div>
+          </div>
+
+
+          <div class="about">
+            <p id="gesture-hint" class="gesture-hint"></p>
+            <p id="describe" class="describe"></p>
+            <p id="estimate-note" class="estimate-note" hidden></p>
+            <p class="attr" data-t="attribution">Map data © OpenStreetMap contributors (ODbL), map tiles © OpenMapTiles via OpenFreeMap. Terrain: Mapzen, AWS Terrain Tiles.</p>
+            <label class="lang"><span data-t="language">Language</span> <select class="lang-select"></select></label>
+          </div>
+        </div>
+      </aside>
+
+      <footer class="attribution">
+        © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> <span data-t="footerContributors">contributors</span> ·
+        <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> ·
+        <a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a> ·
+        <span data-t="footerTerrain">Terrain:</span> <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noopener">Mapzen, AWS Terrain Tiles</a>
+      </footer>
+
+      <dialog class="dialog" id="share-dialog" aria-labelledby="share-title">
+        <form method="dialog" class="dialog-inner">
+          <div class="dialog-head">
+            <h2 id="share-title" data-t="shareTitle">Share this model</h2>
+            <button class="icon-btn" value="close" aria-label="Close" data-t-attr="aria-label:close">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+            </button>
+          </div>
+          <p class="dialog-note" data-t="shareNote">The link holds the coordinates, your view and the pin, never the address you typed. With a pin, it shows exactly that building.</p>
+          <div class="link-row">
+            <input id="share-url" type="text" readonly aria-label="Share link" data-t-attr="aria-label:shareLink" />
+            <button type="button" class="btn" id="copy-btn" data-t="copyLink">Copy link</button>
+          </div>
+          <button type="button" class="btn btn-wide" id="native-share-btn" data-t="shareNative" hidden>Share…</button>
+          <div class="title-fields">
+            <div class="field">
+              <label for="print-title" data-t="titleField">Title on the poster and print</label>
+              <input id="print-title" type="text" maxlength="48" autocomplete="off" enterkeyhint="done" />
+            </div>
+            <div class="field">
+              <label for="print-subtitle"><span data-t="secondLine">Second line</span> <small data-t="optional">optional</small></label>
+              <input id="print-subtitle" type="text" maxlength="48" autocomplete="off" enterkeyhint="done" placeholder="Where we met · June 2019" data-t-attr="placeholder:secondLineExample" />
+            </div>
+          </div>
+          <button type="button" class="btn btn-wide btn-primary" id="poster-btn" data-t="posterButton">Download poster (PNG)</button>
+          <div class="print-block">
+            <div class="control-label">
+              <span id="print-label" data-t="printSize">3D print size</span>
+              <small id="print-note"></small>
+            </div>
+            <div class="segmented" role="radiogroup" aria-labelledby="print-label" id="print-size-group">
+              <button type="button" role="radio" data-value="100" aria-checked="false" tabindex="-1">10 cm</button>
+              <button type="button" role="radio" data-value="150" aria-checked="true">15 cm</button>
+              <button type="button" role="radio" data-value="200" aria-checked="false" tabindex="-1">20 cm</button>
+            </div>
+            <div class="control-label tiles-label">
+              <label for="tiles-range" data-t="tilesLabel">Split into tiles that fit your print bed</label>
+              <output id="tiles-out" for="tiles-range" data-t="onePiece">One piece</output>
+            </div>
+            <input type="range" id="tiles-range" min="1" max="8" step="1" value="1" />
+            <label class="check"><input type="checkbox" id="print-ledge" checked /> <span data-t="titleStrip">Add the title in raised letters on a strip in front</span></label>
+            <fieldset class="paint-set">
+              <legend data-t="paintEdges">Edges to paint along</legend>
+              <label class="check"><input type="checkbox" id="print-water" checked /> <span data-t="sinkWater">Sink water 1 mm</span></label>
+              <label class="check"><input type="checkbox" id="print-roads" /> <span data-t="raiseRoads">Raise roads 0.4 mm</span></label>
+              <label class="check"><input type="checkbox" id="print-green" /> <span data-t="raiseGreen">Raise parks and woods 0.6 mm</span></label>
+            </fieldset>
+            <button type="button" class="btn btn-wide" id="stl-btn" data-t="stlButton">Download 3D print file (STL)</button>
+          </div>
+          <p class="dialog-note" id="share-msg" role="status" aria-live="polite"></p>
+        </form>
+      </dialog>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+      <div class="unsupported" id="unsupported" hidden>
+        <h1 data-t="unsupportedTitle">This browser can’t show the 3D model</h1>
+        <p data-t="unsupportedText">Your Place needs WebGL 2. Try a current version of Safari, Chrome, Firefox or Edge, or turn on hardware acceleration in your browser settings.</p>
+      </div>
+    </div>
+    <noscript>
+      <p class="noscript">Your Place builds a 3D model of any address in your browser and needs JavaScript and WebGL 2.
+        <a href="./about/">Read how it works</a>.</p>
+    </noscript>
+  </body>
+</html>
