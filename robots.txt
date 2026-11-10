@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yourplace3d.github.io/3dcitydata/sitemap.xml
